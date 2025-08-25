@@ -41,7 +41,7 @@ export const usersApi = apiSlice.injectEndpoints({
         url: `users/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Users'],
+      invalidatesTags: ['Users', 'Addresses'],
     }),
   }),
 });

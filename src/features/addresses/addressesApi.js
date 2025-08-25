@@ -10,6 +10,14 @@ export const addressesApi = apiSlice.injectEndpoints({
       providesTags: ['Addresses'],
     }),
 
+    getAddressesWithoutUsers: build.query({
+      query: (id) => ({
+        url: `addresses/without-users`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, id) => [{ type: 'Addresses', id }],
+    }),
+
     getAddressById: build.query({
       query: (id) => ({
         url: `addresses/${id}`,
@@ -41,13 +49,14 @@ export const addressesApi = apiSlice.injectEndpoints({
         url: `addresses/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Addresses'],
+      invalidatesTags: ['Addresses', 'Users'],
     }),
   }),
 });
 
 export const {
   useGetAllAddressesQuery,
+  useGetAddressesWithoutUsersQuery,
   useGetAddressByIdQuery,
   useCreateAddressMutation,
   useUpdateAddressMutation,
