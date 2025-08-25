@@ -5,43 +5,46 @@ export const usersApi = apiSlice.injectEndpoints({
     getAllUsers: build.query({
       query: () => ({
         url: `users`,
-        method: 'GET',
+        method: "GET",
       }),
-      providesTags: ['Users'],
+      providesTags: ["Users"],
     }),
 
     getUserById: build.query({
       query: (id) => ({
         url: `users/${id}`,
-        method: 'GET',
+        method: "GET",
       }),
-      providesTags: (result, error, id) => [{ type: 'Users', id }],
+      providesTags: (result, error, id) => [{ type: "Users", id }],
     }),
 
     createUser: build.mutation({
       query: (body) => ({
         url: `users`,
-        method: 'POST',
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['Users'],
+      invalidatesTags: ["Users"],
     }),
 
     updateUser: build.mutation({
       query: ({ id, ...body }) => ({
         url: `users/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Users', id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Users", id },
+        "Users",
+      ],
     }),
 
     deleteUser: build.mutation({
       query: (id) => ({
         url: `users/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Users', 'Addresses'],
+      invalidatesTags: ["Users", "Addresses"],
     }),
   }),
 });

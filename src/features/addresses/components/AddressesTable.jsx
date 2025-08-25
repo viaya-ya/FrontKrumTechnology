@@ -30,7 +30,7 @@ export default function AddressesTable() {
       }));
       setAddresses(addressesWithKey);
     }
-  }, [arrayAddresses]);
+  }, [arrayAddresses, isLoading, isFetching, isError]);
 
   const handleEdit = (record) => {
     setEditingKey(record.key);

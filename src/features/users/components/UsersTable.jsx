@@ -24,7 +24,8 @@ export default function UsersTable() {
     isError,
   } = useGetAllUsersQuery();
 
-  const { data: arrayAddressesWithoutUsers } = useGetAddressesWithoutUsersQuery();
+  const { data: arrayAddressesWithoutUsers } =
+    useGetAddressesWithoutUsersQuery();
 
   useEffect(() => {
     if (arrayUsers?.length > 0) {
@@ -37,7 +38,7 @@ export default function UsersTable() {
       }));
       setUsers(usersWithKey);
     }
-  }, [arrayUsers]);
+  }, [arrayUsers, isLoading, isFetching, isError]);
 
   const handleEdit = (record) => {
     setEditingKey(record.key);
