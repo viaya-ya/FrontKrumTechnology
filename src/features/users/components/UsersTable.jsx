@@ -632,16 +632,9 @@ export default function UsersTable() {
               }
               options={arrayAddressesWithoutUsers?.map((item) => ({
                 value: item.id,
-                label:
-                  item.region +
-                  " " +
-                  item.city +
-                  " " +
-                  item.street +
-                  " " +
-                  item.house +
-                  " " +
-                  item.apartment,
+               label: `${item.region}, ${item.city}, ${item.street}, ${
+                    item.house
+                  }${item.apartment ? `, кв. ${item.apartment}` : ""}`,
               }))}
             />
           </Form.Item>
