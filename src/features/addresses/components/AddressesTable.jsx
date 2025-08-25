@@ -110,7 +110,7 @@ export default function AddressesTable() {
       console.error("Update error:", error);
     }
   };
-
+  
   const handleCreateSave = async () => {
     try {
       const values = await createForm.validateFields();
@@ -144,36 +144,76 @@ export default function AddressesTable() {
 
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "№",
+      key: "index",
       width: 60,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "Регион",
       dataIndex: "region",
       key: "region",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(addresses.map((item) => item.region || "").filter(Boolean))
+      ).map((region) => ({
+        text: region,
+        value: region,
+      })),
+      onFilter: (value, record) => (record.region || "").includes(value),
     },
     {
       title: "Город",
       dataIndex: "city",
       key: "city",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(addresses.map((item) => item.city || "").filter(Boolean))
+      ).map((city) => ({
+        text: city,
+        value: city,
+      })),
+      onFilter: (value, record) => (record.city || "").includes(value),
     },
     {
       title: "Улица",
       dataIndex: "street",
       key: "street",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(addresses.map((item) => item.street || "").filter(Boolean))
+      ).map((street) => ({
+        text: street,
+        value: street,
+      })),
+      onFilter: (value, record) => (record.street || "").includes(value),
     },
     {
       title: "Дом",
       dataIndex: "house",
       key: "house",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(addresses.map((item) => item.house || "").filter(Boolean))
+      ).map((house) => ({
+        text: house,
+        value: house,
+      })),
+      onFilter: (value, record) => (record.house || "").includes(value),
     },
     {
       title: "Квартира",
       dataIndex: "apartment",
       key: "apartment",
       render: (apartment) => apartment || "-",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(addresses.map((item) => item.apartment || "").filter(Boolean))
+      ).map((apartment) => ({
+        text: apartment,
+        value: apartment,
+      })),
+      onFilter: (value, record) => (record.apartment || "").includes(value),
     },
     {
       title: "Действия",
@@ -205,9 +245,7 @@ export default function AddressesTable() {
               icon={<DeleteOutlined />}
               size="small"
               disabled={editingKey !== ""}
-            >
-              Удалить
-            </Button>
+            ></Button>
           </Popconfirm>
         </Space>
       ),
@@ -417,10 +455,9 @@ export default function AddressesTable() {
             name="house"
             rules={[
               { required: true, message: "Пожалуйста, введите номер дома" },
-              ,
               {
-                pattern: /^[a-zA-Zа-яА-ЯёЁ\s]+$/,
-                message: "Разрешены только буквы",
+                pattern: /^\d+$/,
+                message: "Разрешены только цифры",
               },
             ]}
           >

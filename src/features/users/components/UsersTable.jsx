@@ -63,7 +63,6 @@ export default function UsersTable() {
       const usersWithKey = arrayUsers.map((item) => ({
         ...item,
         key: item.id || Math.random().toString(36).substr(2, 9),
-        // Форматируем дату для отображения
         birthDateFormatted: item.birthDate
           ? dayjs(item.birthDate).format("DD.MM.YYYY")
           : "",
@@ -73,11 +72,13 @@ export default function UsersTable() {
   }, [arrayUsers]);
 
   const handleEdit = (record) => {
+    console.log("record", record);
     setEditingKey(record.key);
     setCurrentRecord(record);
     form.setFieldsValue({
       ...record,
       birthDate: record.birthDate ? dayjs(record.birthDate) : null,
+      addressId: record?.address?.id
     });
     setIsModalVisible(true);
   };
@@ -116,7 +117,6 @@ export default function UsersTable() {
         birthDate: cleanedValues.birthDate
           ? cleanedValues.birthDate.format("YYYY-MM-DD")
           : null,
-        addressId: currentRecord.address?.id,
       };
 
       await updateUser(updatedUser).unwrap();
@@ -174,53 +174,152 @@ export default function UsersTable() {
 
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "№",
+      key: "index",
       width: 60,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "Имя",
       dataIndex: "firstName",
       key: "firstName",
+      filterSearch: true,
+      filters: Array.from(new Set(users.map((item) => item.firstName))).map(
+        (name) => ({
+          text: name,
+          value: name,
+        })
+      ),
+      onFilter: (value, record) => record.firstName.includes(value),
     },
     {
       title: "Фамилия",
       dataIndex: "lastName",
       key: "lastName",
+      filterSearch: true,
+      filters: Array.from(new Set(users.map((item) => item.lastName))).map(
+        (name) => ({
+          text: name,
+          value: name,
+        })
+      ),
+      onFilter: (value, record) => record.lastName.includes(value),
     },
     {
       title: "Отчество",
       dataIndex: "middleName",
       key: "middleName",
       render: (middleName) => middleName || "-",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(users.map((item) => item.middleName || "").filter(Boolean))
+      ).map((name) => ({
+        text: name,
+        value: name,
+      })),
+      onFilter: (value, record) => (record.middleName || "").includes(value),
     },
     {
       title: "Телефон",
       dataIndex: "phone",
       key: "phone",
       render: (phone) => phone || "-",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(users.map((item) => item.phone || "").filter(Boolean))
+      ).map((phone) => ({
+        text: phone,
+        value: phone,
+      })),
+      onFilter: (value, record) => (record.phone || "").includes(value),
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
       render: (email) => email || "-",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(users.map((item) => item.email || "").filter(Boolean))
+      ).map((email) => ({
+        text: email,
+        value: email,
+      })),
+      onFilter: (value, record) => (record.email || "").includes(value),
     },
     {
       title: "Дата рождения",
       dataIndex: "birthDateFormatted",
       key: "birthDate",
       render: (date) => date || "-",
+      filterSearch: true,
+      filters: Array.from(
+        new Set(
+          users.map((item) => item.birthDateFormatted || "").filter(Boolean)
+        )
+      ).map((date) => ({
+        text: date,
+        value: date,
+      })),
+      onFilter: (value, record) =>
+        (record.birthDateFormatted || "").includes(value),
     },
     {
       title: "Адрес",
-      dataIndex: ["address", "city"],
+      dataIndex: "address",
       key: "address",
-      render: (city, record) =>
-        record.address
-          ? `${record.address.city}, ${record.address.street}`
-          : "-",
+      render: (_, record) => {
+        if (!record?.address) return "-";
+
+        const { region, city, street, house, apartment } = record.address;
+        const addressParts = [
+          region,
+          city,
+          street,
+          house,
+          apartment ? `кв. ${apartment}` : null,
+        ].filter(Boolean);
+
+        return addressParts.length > 0 ? addressParts.join(", ") : "-";
+      },
+      filterSearch: true,
+      filters: Array.from(
+        new Set(
+          users.map((item) => {
+            if (!item?.address) return "-";
+
+            const { region, city, street, house, apartment } = item.address;
+            const addressParts = [
+              region,
+              city,
+              street,
+              house,
+              apartment ? `кв. ${apartment}` : null,
+            ].filter(Boolean);
+
+            return addressParts.length > 0 ? addressParts.join(", ") : "-";
+          })
+        )
+      ).map((address) => ({
+        text: address,
+        value: address,
+      })),
+      onFilter: (value, record) => {
+        if (!record?.address) return value === "-";
+
+        const { region, city, street, house, apartment } = record.address;
+        const addressParts = [
+          region,
+          city,
+          street,
+          house,
+          apartment ? `кв. ${apartment}` : null,
+        ].filter(Boolean);
+
+        const addressStr =
+          addressParts.length > 0 ? addressParts.join(", ") : "-";
+        return addressStr.includes(value);
+      },
     },
     {
       title: "Действия",
@@ -252,9 +351,7 @@ export default function UsersTable() {
               icon={<DeleteOutlined />}
               size="small"
               disabled={editingKey !== ""}
-            >
-              Удалить
-            </Button>
+            ></Button>
           </Popconfirm>
         </Space>
       ),
@@ -323,16 +420,6 @@ export default function UsersTable() {
         <Form
           form={form}
           layout="vertical"
-          initialValues={
-            currentRecord
-              ? {
-                  ...currentRecord,
-                  birthDate: currentRecord.birthDate
-                    ? dayjs(currentRecord.birthDate)
-                    : null,
-                }
-              : {}
-          }
         >
           <Form.Item
             label="Имя"
@@ -399,6 +486,42 @@ export default function UsersTable() {
             <DatePicker
               style={{ width: "100%" }}
               placeholder="Выберите дату рождения"
+            />
+          </Form.Item>
+
+          <Form.Item label="Адрес" name="addressId">
+            <Select
+              allowClear
+              placeholder="Выберите адрес"
+              showSearch
+              optionFilterProp="label"
+              filterOption={(input, option) =>
+                option?.label?.toLowerCase().includes(input.toLowerCase())
+              }
+              options={[
+                ...(currentRecord?.address
+                  ? [
+                      {
+                        value: currentRecord.address.id,
+                        label: `${currentRecord.address.region}, ${
+                          currentRecord.address.city
+                        }, ${currentRecord.address.street}, ${
+                          currentRecord.address.house
+                        }${
+                          currentRecord.address.apartment
+                            ? `, кв. ${currentRecord.address.apartment}`
+                            : ""
+                        }`,
+                      },
+                    ]
+                  : []),
+                ...(arrayAddressesWithoutUsers?.map((item) => ({
+                  value: item.id,
+                  label: `${item.region}, ${item.city}, ${item.street}, ${
+                    item.house
+                  }${item.apartment ? `, кв. ${item.apartment}` : ""}`,
+                })) || []),
+              ]}
             />
           </Form.Item>
         </Form>
